@@ -2,6 +2,7 @@ package core
 
 import (
 	"dbcore/pbfiles"
+	"fmt"
 )
 
 type API struct {
@@ -10,17 +11,42 @@ type API struct {
 	Sql   string `yaml:"sql"`
 }
 
+func (this *API) Query(params *pbfiles.SimpleParam) ([]map[string]interface{}, error) {
+	if this.Table == "" || this.Sql == "" {
+		return nil, fmt.Errorf("error sql or table")
+	}
+
+	if this.Sql != "" {
+		return this.QueryBySql(params)
+	}
+
+	return this.QueryByTableName(params)
+}
+
 func (this *API) QueryByTableName(params *pbfiles.SimpleParam) ([]map[string]interface{}, error) {
 	dbResult := make([]map[string]interface{}, 0)
 	db := GormDB.Table(this.Table)
 
-	if params != nil {
+	if params != nil && params.Params != nil {
 		for k, v := range params.Params.AsMap() {
 			db = db.Where(k, v)
 		}
 	}
 
 	db = db.Find(&dbResult)
+
+	return dbResult, db.Error
+}
+
+func (this *API) QueryBySql(params *pbfiles.SimpleParam) ([]map[string]interface{}, error) {
+	dbResult := make([]map[string]interface{}, 0)
+
+	values := map[string]interface{}{}
+	if params != nil && params.Params != nil {
+		values = params.Params.AsMap()
+	}
+
+	db := GormDB.Raw(this.Sql, values).Find(&dbResult)
 
 	return dbResult, db.Error
 }
