@@ -5,4 +5,5 @@ import "dbrequest.proto";
 service DBService {
     rpc Query(QueryRequest) returns (QueryResponse);
     rpc Exec(ExecRequest) returns (ExecResponse);
+    rpc Tx(stream TxRequest) returns (stream TxResponse);
 }

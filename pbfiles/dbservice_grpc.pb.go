@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type DBServiceClient interface {
 	Query(ctx context.Context, in *QueryRequest, opts ...grpc.CallOption) (*QueryResponse, error)
 	Exec(ctx context.Context, in *ExecRequest, opts ...grpc.CallOption) (*ExecResponse, error)
+	Tx(ctx context.Context, opts ...grpc.CallOption) (DBService_TxClient, error)
 }
 
 type dBServiceClient struct {
@@ -52,12 +53,44 @@ func (c *dBServiceClient) Exec(ctx context.Context, in *ExecRequest, opts ...grp
 	return out, nil
 }
 
+func (c *dBServiceClient) Tx(ctx context.Context, opts ...grpc.CallOption) (DBService_TxClient, error) {
+	stream, err := c.cc.NewStream(ctx, &DBService_ServiceDesc.Streams[0], "/DBService/Tx", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &dBServiceTxClient{stream}
+	return x, nil
+}
+
+type DBService_TxClient interface {
+	Send(*TxRequest) error
+	Recv() (*TxResponse, error)
+	grpc.ClientStream
+}
+
+type dBServiceTxClient struct {
+	grpc.ClientStream
+}
+
+func (x *dBServiceTxClient) Send(m *TxRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *dBServiceTxClient) Recv() (*TxResponse, error) {
+	m := new(TxResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // DBServiceServer is the server API for DBService service.
 // All implementations must embed UnimplementedDBServiceServer
 // for forward compatibility
 type DBServiceServer interface {
 	Query(context.Context, *QueryRequest) (*QueryResponse, error)
 	Exec(context.Context, *ExecRequest) (*ExecResponse, error)
+	Tx(DBService_TxServer) error
 	mustEmbedUnimplementedDBServiceServer()
 }
 
@@ -70,6 +103,9 @@ func (UnimplementedDBServiceServer) Query(context.Context, *QueryRequest) (*Quer
 }
 func (UnimplementedDBServiceServer) Exec(context.Context, *ExecRequest) (*ExecResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Exec not implemented")
+}
+func (UnimplementedDBServiceServer) Tx(DBService_TxServer) error {
+	return status.Errorf(codes.Unimplemented, "method Tx not implemented")
 }
 func (UnimplementedDBServiceServer) mustEmbedUnimplementedDBServiceServer() {}
 
@@ -120,6 +156,32 @@ func _DBService_Exec_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DBService_Tx_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(DBServiceServer).Tx(&dBServiceTxServer{stream})
+}
+
+type DBService_TxServer interface {
+	Send(*TxResponse) error
+	Recv() (*TxRequest, error)
+	grpc.ServerStream
+}
+
+type dBServiceTxServer struct {
+	grpc.ServerStream
+}
+
+func (x *dBServiceTxServer) Send(m *TxResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *dBServiceTxServer) Recv() (*TxRequest, error) {
+	m := new(TxRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // DBService_ServiceDesc is the grpc.ServiceDesc for DBService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -136,6 +198,13 @@ var DBService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _DBService_Exec_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Tx",
+			Handler:       _DBService_Tx_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "dbservice.proto",
 }

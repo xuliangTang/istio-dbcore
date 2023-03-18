@@ -6,6 +6,8 @@ import (
 	"dbcore/pbfiles"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"io"
+	"log"
 )
 
 type DBService struct {
@@ -47,14 +49,66 @@ func (this *DBService) Exec(ctx context.Context, in *pbfiles.ExecRequest) (*pbfi
 	}
 
 	// 把 map[string]interface{} 转化为 protobuf struct
-	selectKeyValue, err := helpers.MapToStruct(selectKey)
-	if err != nil {
-		selectKeyValue = nil
-	}
+	selectKeyValue, _ := helpers.MapToStruct(selectKey)
 
 	return &pbfiles.ExecResponse{
 		Message:      "success",
 		RowsAffected: rowsAffected,
 		Select:       selectKeyValue,
 	}, nil
+}
+
+func (this *DBService) Tx(c pbfiles.DBService_TxServer) error {
+	tx := GormDB.Begin()
+
+	for {
+		txRequest, err := c.Recv()
+		if err != nil {
+			if err == io.EOF {
+				log.Println("EOF")
+				tx.Commit()
+				return nil
+			}
+
+			log.Println("错误0:", err)
+			tx.Rollback()
+			return err
+		}
+
+		api := SysConfig.FindAPI(txRequest.Name)
+		if api == nil {
+			tx.Rollback()
+			return status.Error(codes.Unavailable, "error api name")
+		}
+
+		api.SetDb(tx) // 设置db连接对象
+		ret := make(map[string]interface{})
+		if txRequest.Type == "query" {
+			queryResult, err := api.Query(txRequest.Params)
+			if err != nil {
+				log.Println("错误1:", err)
+				tx.Rollback()
+				return err
+			}
+			ret["query"] = queryResult
+		} else {
+			rowsAffected, selectKey, err := api.ExecBySql(txRequest.Params)
+			if err != nil {
+				log.Println("错误2:", err)
+				tx.Rollback()
+				return err
+			}
+			ret["exec"] = []interface{}{rowsAffected, selectKey}
+		}
+
+		m, _ := helpers.MapToStruct(ret)
+		err = c.Send(&pbfiles.TxResponse{
+			Result: m,
+		})
+		if err != nil {
+			log.Println("错误3:", err)
+			tx.Rollback()
+			return err
+		}
+	}
 }

@@ -15,6 +15,19 @@ type API struct {
 	Table  string  `yaml:"table"`
 	Sql    string  `yaml:"sql"`
 	Select *Select `yaml:"select"`
+	Db     *gorm.DB
+}
+
+func (this *API) SetDb(db *gorm.DB) {
+	this.Db = db
+}
+
+func (this *API) GetDb() *gorm.DB {
+	if this.Db == nil {
+		return GormDB
+	}
+
+	return this.Db
 }
 
 func (this *API) ExecBySql(params *pbfiles.SimpleParam) (int64, map[string]interface{}, error) {
@@ -25,7 +38,7 @@ func (this *API) ExecBySql(params *pbfiles.SimpleParam) (int64, map[string]inter
 	if this.Select != nil {
 		selectKey := make(map[string]interface{})
 		var rowsAffected int64 = 0
-		err := GormDB.Transaction(func(tx *gorm.DB) error {
+		err := this.GetDb().Transaction(func(tx *gorm.DB) error {
 			db := tx.Exec(this.Sql, params.Params.AsMap())
 			if db.Error != nil {
 				return db.Error
@@ -43,7 +56,7 @@ func (this *API) ExecBySql(params *pbfiles.SimpleParam) (int64, map[string]inter
 		return rowsAffected, selectKey, nil
 
 	} else {
-		db := GormDB.Exec(this.Sql, params.Params.AsMap())
+		db := this.GetDb().Exec(this.Sql, params.Params.AsMap())
 		return db.RowsAffected, nil, db.Error
 	}
 }
@@ -84,7 +97,7 @@ func (this *API) QueryBySql(params *pbfiles.SimpleParam) ([]map[string]interface
 		values = params.Params.AsMap()
 	}
 
-	db := GormDB.Raw(this.Sql, values).Find(&dbResult)
+	db := this.GetDb().Raw(this.Sql, values).Find(&dbResult)
 
 	return dbResult, db.Error
 }

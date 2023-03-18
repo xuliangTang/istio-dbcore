@@ -12,8 +12,8 @@ message QueryRequest {
 }
 
 message QueryResponse {
-     string message=1;   //结果描述
-     repeated google.protobuf.Struct result=2;  //
+   string message=1;   //结果描述
+   repeated google.protobuf.Struct result=2;  //
 }
 
 message ExecRequest {
@@ -25,4 +25,14 @@ message ExecResponse {
   string message = 1;
   int64 rowsAffected = 2;
   google.protobuf.Struct select = 3;  // 设置执行完exec后要取的值
+}
+
+message TxRequest {
+  string name = 1;
+  SimpleParam params = 2;
+  string type = 3;  // 支持 query 和 exec
+}
+
+message TxResponse {
+  google.protobuf.Struct result = 1;
 }
