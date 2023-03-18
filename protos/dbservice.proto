@@ -1,0 +1,7 @@
+syntax = "proto3";
+option go_package = "./pbfiles";
+import "dbrequest.proto";
+
+service DBService {
+    rpc Query(QueryRequest) returns (QueryResponse);
+}
