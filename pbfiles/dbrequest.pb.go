@@ -21,18 +21,66 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type SimpleParam struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Params *structpb.Struct `protobuf:"bytes,1,opt,name=params,proto3" json:"params,omitempty"`
+}
+
+func (x *SimpleParam) Reset() {
+	*x = SimpleParam{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_dbrequest_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SimpleParam) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SimpleParam) ProtoMessage() {}
+
+func (x *SimpleParam) ProtoReflect() protoreflect.Message {
+	mi := &file_dbrequest_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SimpleParam.ProtoReflect.Descriptor instead.
+func (*SimpleParam) Descriptor() ([]byte, []int) {
+	return file_dbrequest_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *SimpleParam) GetParams() *structpb.Struct {
+	if x != nil {
+		return x.Params
+	}
+	return nil
+}
+
 type QueryRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"` //api名称
+	Name   string       `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`     //api名称
+	Params *SimpleParam `protobuf:"bytes,2,opt,name=params,proto3" json:"params,omitempty"` // 用于拼凑where
 }
 
 func (x *QueryRequest) Reset() {
 	*x = QueryRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_dbrequest_proto_msgTypes[0]
+		mi := &file_dbrequest_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -45,7 +93,7 @@ func (x *QueryRequest) String() string {
 func (*QueryRequest) ProtoMessage() {}
 
 func (x *QueryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_dbrequest_proto_msgTypes[0]
+	mi := &file_dbrequest_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +106,7 @@ func (x *QueryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QueryRequest.ProtoReflect.Descriptor instead.
 func (*QueryRequest) Descriptor() ([]byte, []int) {
-	return file_dbrequest_proto_rawDescGZIP(), []int{0}
+	return file_dbrequest_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *QueryRequest) GetName() string {
@@ -66,6 +114,13 @@ func (x *QueryRequest) GetName() string {
 		return x.Name
 	}
 	return ""
+}
+
+func (x *QueryRequest) GetParams() *SimpleParam {
+	if x != nil {
+		return x.Params
+	}
+	return nil
 }
 
 type QueryResponse struct {
@@ -80,7 +135,7 @@ type QueryResponse struct {
 func (x *QueryResponse) Reset() {
 	*x = QueryResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_dbrequest_proto_msgTypes[1]
+		mi := &file_dbrequest_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -93,7 +148,7 @@ func (x *QueryResponse) String() string {
 func (*QueryResponse) ProtoMessage() {}
 
 func (x *QueryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_dbrequest_proto_msgTypes[1]
+	mi := &file_dbrequest_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -106,7 +161,7 @@ func (x *QueryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QueryResponse.ProtoReflect.Descriptor instead.
 func (*QueryResponse) Descriptor() ([]byte, []int) {
-	return file_dbrequest_proto_rawDescGZIP(), []int{1}
+	return file_dbrequest_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *QueryResponse) GetMessage() string {
@@ -129,16 +184,22 @@ var file_dbrequest_proto_rawDesc = []byte{
 	0x0a, 0x0f, 0x64, 0x62, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x1a, 0x1c, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
 	0x75, 0x66, 0x2f, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22,
-	0x22, 0x0a, 0x0c, 0x51, 0x75, 0x65, 0x72, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
-	0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e,
-	0x61, 0x6d, 0x65, 0x22, 0x5a, 0x0a, 0x0d, 0x51, 0x75, 0x65, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x2f,
-	0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x17,
+	0x3e, 0x0a, 0x0b, 0x53, 0x69, 0x6d, 0x70, 0x6c, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x12, 0x2f,
+	0x0a, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x17,
 	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
-	0x2e, 0x53, 0x74, 0x72, 0x75, 0x63, 0x74, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x42,
-	0x0b, 0x5a, 0x09, 0x2e, 0x2f, 0x70, 0x62, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x2e, 0x53, 0x74, 0x72, 0x75, 0x63, 0x74, 0x52, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x22,
+	0x48, 0x0a, 0x0c, 0x51, 0x75, 0x65, 0x72, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e,
+	0x61, 0x6d, 0x65, 0x12, 0x24, 0x0a, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x53, 0x69, 0x6d, 0x70, 0x6c, 0x65, 0x50, 0x61, 0x72, 0x61,
+	0x6d, 0x52, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x22, 0x5a, 0x0a, 0x0d, 0x51, 0x75, 0x65,
+	0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73,
+	0x73, 0x61, 0x67, 0x65, 0x12, 0x2f, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x02,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x53, 0x74, 0x72, 0x75, 0x63, 0x74, 0x52, 0x06, 0x72,
+	0x65, 0x73, 0x75, 0x6c, 0x74, 0x42, 0x0b, 0x5a, 0x09, 0x2e, 0x2f, 0x70, 0x62, 0x66, 0x69, 0x6c,
+	0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -153,19 +214,22 @@ func file_dbrequest_proto_rawDescGZIP() []byte {
 	return file_dbrequest_proto_rawDescData
 }
 
-var file_dbrequest_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_dbrequest_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_dbrequest_proto_goTypes = []interface{}{
-	(*QueryRequest)(nil),    // 0: QueryRequest
-	(*QueryResponse)(nil),   // 1: QueryResponse
-	(*structpb.Struct)(nil), // 2: google.protobuf.Struct
+	(*SimpleParam)(nil),     // 0: SimpleParam
+	(*QueryRequest)(nil),    // 1: QueryRequest
+	(*QueryResponse)(nil),   // 2: QueryResponse
+	(*structpb.Struct)(nil), // 3: google.protobuf.Struct
 }
 var file_dbrequest_proto_depIdxs = []int32{
-	2, // 0: QueryResponse.result:type_name -> google.protobuf.Struct
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	3, // 0: SimpleParam.params:type_name -> google.protobuf.Struct
+	0, // 1: QueryRequest.params:type_name -> SimpleParam
+	3, // 2: QueryResponse.result:type_name -> google.protobuf.Struct
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_dbrequest_proto_init() }
@@ -175,7 +239,7 @@ func file_dbrequest_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_dbrequest_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*QueryRequest); i {
+			switch v := v.(*SimpleParam); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -187,6 +251,18 @@ func file_dbrequest_proto_init() {
 			}
 		}
 		file_dbrequest_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*QueryRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_dbrequest_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*QueryResponse); i {
 			case 0:
 				return &v.state
@@ -205,7 +281,7 @@ func file_dbrequest_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_dbrequest_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

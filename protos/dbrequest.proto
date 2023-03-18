@@ -2,8 +2,13 @@ syntax = "proto3";
 option go_package = "./pbfiles";
 import "google/protobuf/struct.proto";
 
+message SimpleParam {
+  google.protobuf.Struct params = 1;
+}
+
 message QueryRequest {
     string name=1;   //api名称
+    SimpleParam params = 2; // 用于拼凑where
 }
 
 message QueryResponse {

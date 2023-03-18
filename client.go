@@ -5,6 +5,7 @@ import (
 	"dbcore/pbfiles"
 	"fmt"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/structpb"
 	"log"
 )
 
@@ -17,7 +18,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	req := &pbfiles.QueryRequest{Name: "userlist"}
+
+	structPb, err := structpb.NewStruct(map[string]interface{}{
+		"id = ?": 1,
+	})
+
+	params := &pbfiles.SimpleParam{
+		Params: structPb,
+	}
+
+	req := &pbfiles.QueryRequest{Name: "userlist", Params: params}
 	rsp := &pbfiles.QueryResponse{}
 	err = client.Invoke(context.Background(),
 		"/DBService/Query", req, rsp)
