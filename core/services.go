@@ -34,3 +34,20 @@ func (this *DBService) Query(ctx context.Context, in *pbfiles.QueryRequest) (*pb
 		Result:  structList,
 	}, nil
 }
+
+func (this *DBService) Exec(ctx context.Context, in *pbfiles.ExecRequest) (*pbfiles.ExecResponse, error) {
+	api := SysConfig.FindAPI(in.Name)
+	if api == nil {
+		return nil, status.Error(codes.Unavailable, "error api name")
+	}
+
+	ret, err := api.Exec(in.Params)
+	if err != nil {
+		return nil, status.Error(codes.Unavailable, err.Error())
+	}
+
+	return &pbfiles.ExecResponse{
+		Message:      "success",
+		RowsAffected: ret,
+	}, nil
+}

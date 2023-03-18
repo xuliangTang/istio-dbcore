@@ -20,21 +20,23 @@ func main() {
 	}
 
 	structPb, err := structpb.NewStruct(map[string]interface{}{
-		"id": 0,
+		"name": "txl",
+		"age":  18,
 	})
 
 	params := &pbfiles.SimpleParam{
 		Params: structPb,
 	}
 
-	req := &pbfiles.QueryRequest{Name: "userlist", Params: params}
-	rsp := &pbfiles.QueryResponse{}
+	req := &pbfiles.ExecRequest{Name: "adduser", Params: params}
+	rsp := &pbfiles.ExecResponse{}
 	err = client.Invoke(context.Background(),
-		"/DBService/Query", req, rsp)
+		"/DBService/Exec", req, rsp)
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, item := range rsp.Result {
-		fmt.Println(item.AsMap())
-	}
+	fmt.Println(rsp.RowsAffected)
+	//for _, item := range rsp.Result {
+	//	fmt.Println(item.AsMap())
+	//}
 }

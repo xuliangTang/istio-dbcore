@@ -15,3 +15,13 @@ message QueryResponse {
      string message=1;   //结果描述
      repeated google.protobuf.Struct result=2;  //
 }
+
+message ExecRequest {
+  string name = 1;
+  SimpleParam params = 2;
+}
+
+message ExecResponse {
+  string message = 1;
+  int64 rowsAffected = 2;
+}

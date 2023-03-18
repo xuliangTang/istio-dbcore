@@ -11,6 +11,16 @@ type API struct {
 	Sql   string `yaml:"sql"`
 }
 
+func (this *API) Exec(params *pbfiles.SimpleParam) (int64, error) {
+	if this.Sql == "" {
+		return 0, fmt.Errorf("error sql")
+	}
+
+	db := GormDB.Exec(this.Sql, params.Params.AsMap())
+
+	return db.RowsAffected, db.Error
+}
+
 func (this *API) Query(params *pbfiles.SimpleParam) ([]map[string]interface{}, error) {
 	if this.Table == "" || this.Sql == "" {
 		return nil, fmt.Errorf("error sql or table")
@@ -23,6 +33,7 @@ func (this *API) Query(params *pbfiles.SimpleParam) ([]map[string]interface{}, e
 	return this.QueryByTableName(params)
 }
 
+// deprecated
 func (this *API) QueryByTableName(params *pbfiles.SimpleParam) ([]map[string]interface{}, error) {
 	dbResult := make([]map[string]interface{}, 0)
 	db := GormDB.Table(this.Table)
