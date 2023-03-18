@@ -41,13 +41,20 @@ func (this *DBService) Exec(ctx context.Context, in *pbfiles.ExecRequest) (*pbfi
 		return nil, status.Error(codes.Unavailable, "error api name")
 	}
 
-	ret, err := api.Exec(in.Params)
+	rowsAffected, selectKey, err := api.ExecBySql(in.Params)
 	if err != nil {
 		return nil, status.Error(codes.Unavailable, err.Error())
 	}
 
+	// 把 map[string]interface{} 转化为 protobuf struct
+	selectKeyValue, err := helpers.MapToStruct(selectKey)
+	if err != nil {
+		selectKeyValue = nil
+	}
+
 	return &pbfiles.ExecResponse{
 		Message:      "success",
-		RowsAffected: ret,
+		RowsAffected: rowsAffected,
+		Select:       selectKeyValue,
 	}, nil
 }

@@ -3,22 +3,49 @@ package core
 import (
 	"dbcore/pbfiles"
 	"fmt"
+	"gorm.io/gorm"
 )
 
-type API struct {
-	Name  string `yaml:"name"`
-	Table string `yaml:"table"`
-	Sql   string `yaml:"sql"`
+type Select struct {
+	Sql string `yaml:"sql"`
 }
 
-func (this *API) Exec(params *pbfiles.SimpleParam) (int64, error) {
+type API struct {
+	Name   string  `yaml:"name"`
+	Table  string  `yaml:"table"`
+	Sql    string  `yaml:"sql"`
+	Select *Select `yaml:"select"`
+}
+
+func (this *API) ExecBySql(params *pbfiles.SimpleParam) (int64, map[string]interface{}, error) {
 	if this.Sql == "" {
-		return 0, fmt.Errorf("error sql")
+		return 0, nil, fmt.Errorf("error sql")
 	}
 
-	db := GormDB.Exec(this.Sql, params.Params.AsMap())
+	if this.Select != nil {
+		selectKey := make(map[string]interface{})
+		var rowsAffected int64 = 0
+		err := GormDB.Transaction(func(tx *gorm.DB) error {
+			db := tx.Exec(this.Sql, params.Params.AsMap())
+			if db.Error != nil {
+				return db.Error
+			}
+			rowsAffected = db.RowsAffected
 
-	return db.RowsAffected, db.Error
+			db = tx.Raw(this.Select.Sql, params.Params.AsMap()).Find(&selectKey)
+			return db.Error
+		})
+
+		if err != nil {
+			return 0, nil, err
+		}
+
+		return rowsAffected, selectKey, nil
+
+	} else {
+		db := GormDB.Exec(this.Sql, params.Params.AsMap())
+		return db.RowsAffected, nil, db.Error
+	}
 }
 
 func (this *API) Query(params *pbfiles.SimpleParam) ([]map[string]interface{}, error) {

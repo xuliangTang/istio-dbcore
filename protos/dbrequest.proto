@@ -24,4 +24,5 @@ message ExecRequest {
 message ExecResponse {
   string message = 1;
   int64 rowsAffected = 2;
+  google.protobuf.Struct select = 3;  // 设置执行完exec后要取的值
 }

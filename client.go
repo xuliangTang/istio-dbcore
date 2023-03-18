@@ -35,7 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(rsp.RowsAffected)
+	fmt.Println(rsp.RowsAffected, rsp.Select.AsMap())
 	//for _, item := range rsp.Result {
 	//	fmt.Println(item.AsMap())
 	//}
