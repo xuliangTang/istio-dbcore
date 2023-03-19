@@ -43,6 +43,11 @@ func (this *DBService) Exec(ctx context.Context, in *pbfiles.ExecRequest) (*pbfi
 		return nil, status.Error(codes.Unavailable, "error api name")
 	}
 
+	// 判断客户端是否超时或主动取消
+	if code, yes := helpers.ContextIsBroken(ctx); yes {
+		return nil, status.Error(code, ctx.Err().Error())
+	}
+
 	rowsAffected, selectKey, err := api.ExecBySql(in.Params)
 	if err != nil {
 		return nil, status.Error(codes.Unavailable, err.Error())
