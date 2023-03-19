@@ -62,7 +62,7 @@ func (this *API) ExecBySql(params *pbfiles.SimpleParam) (int64, map[string]inter
 }
 
 func (this *API) Query(params *pbfiles.SimpleParam) ([]map[string]interface{}, error) {
-	if this.Table == "" || this.Sql == "" {
+	if this.Table == "" && this.Sql == "" {
 		return nil, fmt.Errorf("error sql or table")
 	}
 

@@ -25,43 +25,42 @@ func makeParam(m map[string]interface{}) *pbfiles.SimpleParam {
 }
 
 func main() {
-	client, err := grpc.DialContext(context.Background(),
-		"localhost:8080",
-		grpc.WithInsecure(),
-	)
+	client, err := grpc.DialContext(context.Background(), "localhost:8080", grpc.WithInsecure())
 	checkError(err)
 
 	c := pbfiles.NewDBServiceClient(client)
 
-	txClient, err := c.Tx(context.Background()) // 执行事务
+	ctx, cancel := context.WithCancel(context.Background())
+	txClient, err := c.Tx(ctx) // 执行事务
 	checkError(err)
 
-	addUserParam := makeParam(map[string]interface{}{
-		"name": "lain",
-		"age":  17,
-	})
+	// sql插入1
+	addUserParam := makeParam(map[string]interface{}{"name": "lain", "age": 17})
 	err = txClient.Send(&pbfiles.TxRequest{Name: "adduser", Params: addUserParam, Type: "exec"})
 	checkError(err)
-
 	addUseRsp, err := txClient.Recv()
 	checkError(err)
 	ret := addUseRsp.Result.AsMap()
 	userId := ret["exec"].([]interface{})[1].(map[string]interface{})["user_id"]
 	fmt.Println(ret)
 
+	// sql插入2
 	addScoreParam := makeParam(map[string]interface{}{
 		"userId": userId,
 		"score":  10,
 	})
 	err = txClient.Send(&pbfiles.TxRequest{Name: "adduserscore", Params: addScoreParam, Type: "exec"})
 	checkError(err)
-
 	addScoreRsp, err := txClient.Recv()
 	checkError(err)
 	fmt.Println(addScoreRsp.Result.AsMap())
 
+	// 关闭连接
 	err = txClient.CloseSend()
-	checkError(err)
+	cancel()
+	//log.Println(err)
+
+	/*checkError(err)
 	log.Fatal("结束")
 
 	structPb, err := structpb.NewStruct(map[string]interface{}{
@@ -83,5 +82,5 @@ func main() {
 	fmt.Println(rsp.RowsAffected, rsp.Select.AsMap())
 	//for _, item := range rsp.Result {
 	//	fmt.Println(item.AsMap())
-	//}
+	//}*/
 }

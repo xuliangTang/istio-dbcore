@@ -80,6 +80,12 @@ func (this *DBService) Tx(c pbfiles.DBService_TxServer) error {
 			return err
 		}
 
+		// 坑：client的CloseSend() 没有实现EOF标志，要么在服务端检查是否关闭连接，要么在客户端使用cancelContext
+		/*if err = c.Context().Err(); err != nil {
+			log.Printf("Client closed stream: %v", err)
+			return nil
+		}*/
+
 		api := SysConfig.FindAPI(txRequest.Name)
 		if api == nil {
 			tx.Rollback()
@@ -95,7 +101,10 @@ func (this *DBService) Tx(c pbfiles.DBService_TxServer) error {
 				tx.Rollback()
 				return err
 			}
-			ret["query"] = queryResult
+
+			// ret["query"] = queryResult
+			// 取出来的内容是 []map[string]interface 需要转换为[]interface{}，否则 MapToStruct 会出错
+			ret["query"] = helpers.MapListToInterfaceList(queryResult)
 		} else {
 			rowsAffected, selectKey, err := api.ExecBySql(txRequest.Params)
 			if err != nil {
