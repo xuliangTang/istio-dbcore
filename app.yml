@@ -1,0 +1,7 @@
+dbConfig: {}
+
+appConfig:
+  rpcPort: 8080
+  httpPort: 8090
+
+apis: []

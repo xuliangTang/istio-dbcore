@@ -1,0 +1,35 @@
+dbConfig:
+  dsn: "root:root@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+  maxOpenConn: 20
+  maxLifeTime: 1800
+  maxIdleConn: 5
+
+appConfig:
+  rpcPort: 8080
+  httpPort: 8090
+
+apis:
+  - name: userlist
+    table: users
+    sql: "select * from users where id > @id and id <> 2"
+  - name: adduser
+    sql: "insert into users(name, age) values(@name, @age)"
+    select:
+      sql: "select LAST_INSERT_ID() as user_id"
+  - name: adduserscore
+    sql: "insert into user_scores(user_id, score) values(@userId, @score)"
+  - name: getstock
+    sql: "select * from prod_stocks where prod_id = @prodId"
+  - name: setstock
+    sql: "update prod_stocks set stock=@stock,version=version+1 where prod_id = @prodId and version = @version"
+  - name: getProdList
+    sql: "select * from prods order by id desc limit 10"
+  - name: getProdDetail
+    sql: "select * from prods where id=@prodId"
+  - name: createorders
+    sql: "insert into orders(order_no,order_price,user_name,order_time) values(@orderNo,@orderPrice,@userName,now())"
+  - name: createordersdetail
+    sql: "insert into orders_detail(order_no,prod_id,prod_num,prod_price) values(@orderNo,@prodID,@prodNum,@prodPrice)"
+  - name: deptlist
+    table: depts
+    sql: ""
